@@ -1,22 +1,57 @@
+extern crate minifb;
+
 use chip8rs::Config;
+use minifb::{Key, Scale, Window, WindowOptions};
 use std::fs;
 use std::path::Path;
 use std::process;
+use std::time::Duration;
+
+const DISPLAY_WIDTH: usize = 64;
+const DISPLAY_HEIGHT: usize = 32;
+const FRAME_TIME: Duration = Duration::from_micros(166000); // TODO: Change from 1/6s to 1/60s
+const COLOR_EMPTY: u32 = 0x000000;
+const COLOR_FILLED: u32 = 0xFFFFFF;
 
 struct Display {
-    pixels: [bool; 2048],
+    pixels: [u32; DISPLAY_WIDTH * DISPLAY_HEIGHT],
+    window: Window,
 }
 
 impl Display {
     fn new() -> Display {
+        let window_options = WindowOptions {
+            scale: Scale::X16,
+            ..WindowOptions::default()
+        };
+
+        let mut window = Window::new(
+            "Chip8-rs - ESC to exit",
+            DISPLAY_WIDTH,
+            DISPLAY_HEIGHT,
+            window_options,
+        )
+        .unwrap_or_else(|err| {
+            panic!("Could not create window: {}", err);
+        });
+
+        window.limit_update_rate(Some(FRAME_TIME));
+
         Display {
-            pixels: [false; 2048],
+            pixels: [COLOR_EMPTY; DISPLAY_WIDTH * DISPLAY_HEIGHT],
+            window: window,
         }
     }
 
     /// Clears the display
     fn clear(&mut self) {
-        self.pixels.iter_mut().for_each(|x| *x = false);
+        self.pixels.iter_mut().for_each(|x| *x = COLOR_EMPTY);
+    }
+
+    fn update(&mut self) {
+        self.window
+            .update_with_buffer(&self.pixels, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+            .unwrap();
     }
 }
 
@@ -111,6 +146,14 @@ impl Chip8 {
         }
     }
 
+    pub fn window_is_open(&self) -> bool {
+        self.display.window.is_open()
+    }
+
+    pub fn window_is_key_down(&self, key: Key) -> bool {
+        self.display.window.is_key_down(key)
+    }
+
     pub fn run_instruction(&mut self) {
         let current_instruction = self.ram.read_word(self.pc as usize);
         println!("Current Instruction: {:#02x}", current_instruction);
@@ -124,6 +167,8 @@ impl Chip8 {
             _ => println!("Not found"),
             // _ => panic!("Invalid Instruction: {:#02x}", current_instruction),
         }
+
+        self.display.update();
     }
 
     /// 0nnn - SYS addr
