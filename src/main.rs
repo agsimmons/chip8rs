@@ -23,7 +23,11 @@ fn main() {
     loop {
         print!("{}[2J", 27 as char);
         stdout().flush().expect("Failed to flush stdout");
+
         chip8.debug_print_ram();
+        stdout().flush().expect("Failed to flush stdout");
+
+        chip8.debug_print_registers();
         stdout().flush().expect("Failed to flush stdout");
 
         chip8.run_instruction();

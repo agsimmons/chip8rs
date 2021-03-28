@@ -81,4 +81,11 @@ impl Chip8 {
         // NOTE: This is set to only show the beginning of ram for testing
         println!("{:?}", &self.ram.memory[0..1024]);
     }
+
+    pub fn debug_print_registers(&self) {
+        println!("vX: {:?}", self.vx);
+        println!("I: {:?}", self.i);
+        println!("PC: {:?}", self.pc);
+        println!("SP: {:?}", self.sp);
+    }
 }
