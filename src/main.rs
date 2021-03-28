@@ -1,6 +1,6 @@
 extern crate minifb;
 
-use minifb::{Key, Scale, Window, WindowOptions};
+use minifb::Key;
 use std::env;
 use std::io::stdout;
 use std::io::Write;
