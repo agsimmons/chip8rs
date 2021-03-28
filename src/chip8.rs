@@ -3,6 +3,23 @@ use std::fs;
 use std::path::Path;
 use std::process;
 
+struct Display {
+    pixels: [bool; 2048],
+}
+
+impl Display {
+    fn new() -> Display {
+        Display {
+            pixels: [false; 2048],
+        }
+    }
+
+    /// Clears the display
+    fn clear(&mut self) {
+        self.pixels.iter_mut().for_each(|x| *x = false);
+    }
+}
+
 struct Ram {
     memory: [u8; 4096],
 }
@@ -79,6 +96,7 @@ pub struct Chip8 {
     pc: u16,
     sp: u8,
     ram: Ram,
+    display: Display,
 }
 
 impl Chip8 {
@@ -89,6 +107,7 @@ impl Chip8 {
             pc: 0x200,
             sp: 0x0,
             ram: Ram::new(&config.rom_path),
+            display: Display::new(),
         }
     }
 
