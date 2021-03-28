@@ -3,7 +3,6 @@ use std::fs;
 use std::path::Path;
 use std::process;
 
-#[derive(Debug)]
 struct Ram {
     memory: [u8; 4096],
 }
@@ -79,6 +78,7 @@ impl Chip8 {
     pub fn run_instruction(&mut self) {}
 
     pub fn debug_print_ram(&self) {
-        println!("{:?}", self.ram);
+        // NOTE: This is set to only show the beginning of ram for testing
+        println!("{:?}", &self.ram.memory[0..1024]);
     }
 }
