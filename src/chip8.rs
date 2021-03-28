@@ -158,12 +158,21 @@ impl Chip8 {
 
         self.pc += 2;
 
-        match current_instruction {
-            0x00E0 => self.cls(),
-            0x00EE => self.ret(),
-            // TODO: 0nnn - SYS addr
-            _ => println!("Not found"),
-            // _ => panic!("Invalid Instruction: {:#02x}", current_instruction),
+        if current_instruction == 0x00E0 {
+            self.cls();
+        } else if current_instruction == 0x00EE {
+            self.ret();
+        } else if current_instruction >> 12 == 0x1 {
+            // 1nnn
+            self.jp_addr(current_instruction);
+        } else if current_instruction >> 12 == 0x6 {
+            // 6xkk
+            self.ld_vx_byte(current_instruction);
+        } else if current_instruction >> 12 == 0xA {
+            // Annn
+            self.ld_i_addr(current_instruction);
+        } else {
+            panic!("Invalid Instruction: {:#02x}", current_instruction)
         }
 
         self.display.update();
@@ -199,7 +208,7 @@ impl Chip8 {
     ///
     /// The interpreter sets the program counter to nnn.
     fn jp_addr(&mut self, command: u16) {
-        panic!("Not Implemented");
+        self.pc = command & 0x0FFF;
     }
 
     /// 2nnn - CALL addr
@@ -239,7 +248,10 @@ impl Chip8 {
     ///
     /// The interpreter puts the value kk into register Vx.
     fn ld_vx_byte(&mut self, command: u16) {
-        panic!("Not Implemented");
+        let register = (command & 0x0F00) >> 8;
+        let value = command & 0x00FF;
+
+        self.vx[register as usize] = value;
     }
 
     /// 7xkk - ADD Vx, byte
@@ -334,7 +346,9 @@ impl Chip8 {
     ///
     /// The value of register I is set to nnn.
     fn ld_i_addr(&mut self, command: u16) {
-        panic!("Not Implemented");
+        let value = command & 0x0FFF;
+
+        self.i = value;
     }
 
     /// Bnnn - JP V0, addr
