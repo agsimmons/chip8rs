@@ -115,9 +115,7 @@ impl Ram {
         let bytes = self.read_bytes(index, 2);
 
         // Build word from two bytes
-        let word = ((bytes[0] as u16) << 8) | (bytes[1] as u16);
-
-        word
+        ((bytes[0] as u16) << 8) | (bytes[1] as u16)
     }
 
     fn read_bytes(&self, index: usize, size: usize) -> &[u8] {
