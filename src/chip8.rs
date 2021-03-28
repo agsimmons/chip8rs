@@ -54,6 +54,23 @@ impl Ram {
             self.memory[i + index] = *byte;
         }
     }
+
+    fn read_byte(&self, index: usize) -> &u8 {
+        &self.memory[index]
+    }
+
+    fn read_word(&self, index: usize) -> u16 {
+        let bytes = self.read_bytes(index, 2);
+
+        // Build word from two bytes
+        let word = ((bytes[0] as u16) << 8) | (bytes[1] as u16);
+
+        word
+    }
+
+    fn read_bytes(&self, index: usize, size: usize) -> &[u8] {
+        &self.memory[index..index + size]
+    }
 }
 
 pub struct Chip8 {
@@ -75,7 +92,10 @@ impl Chip8 {
         }
     }
 
-    pub fn run_instruction(&mut self) {}
+    pub fn run_instruction(&mut self) {
+        let current_instruction = self.ram.read_word(self.pc as usize);
+        println!("Current Instruction: {:#02x}", current_instruction);
+    }
 
     pub fn debug_print_ram(&self) {
         // NOTE: This is set to only show the beginning of ram for testing
