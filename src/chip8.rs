@@ -5,6 +5,7 @@ use minifb::{Key, Scale, Window, WindowOptions};
 use std::fs;
 use std::path::Path;
 use std::process;
+use std::thread;
 use std::time::Duration;
 
 const DISPLAY_WIDTH: usize = 64;
@@ -52,6 +53,64 @@ impl Display {
         self.window
             .update_with_buffer(&self.pixels, DISPLAY_WIDTH, DISPLAY_HEIGHT)
             .unwrap();
+    }
+
+    /// Wraps coordinates around the display in both x and y
+    fn get_wrapped_coordinates(x: usize, y: usize) -> (usize, usize) {
+        let x = x.rem_euclid(DISPLAY_WIDTH);
+        let y = y.rem_euclid(DISPLAY_HEIGHT);
+
+        (x, y)
+    }
+
+    /// Given the coordinates of a pixel on the display, calculate the index of
+    // the pixel array. This must be provided with a pre-wrapped value. See
+    // get_wrapped_coordinates
+    fn coordinate_to_index(x: usize, y: usize) -> usize {
+        x + (y * DISPLAY_WIDTH)
+    }
+
+    /// Draws sprite at specified coordinate
+    /// The return value will be true if this draw operation causes any pixel
+    /// to be erased
+    fn draw_sprite(&mut self, x: usize, y: usize, sprite_data: &[u8]) -> bool {
+        println!("Drawsprite at ({}, {})", x, y);
+
+        let mut pixels_erased = false;
+        for (i, line) in sprite_data.iter().enumerate() {
+            let local_y = y + i;
+            for j in 0..4 {
+                let local_x = x + j;
+                let (wrapped_x, wrapped_y) = Display::get_wrapped_coordinates(local_x, local_y);
+                let pixel_index = Display::coordinate_to_index(wrapped_x, wrapped_y);
+
+                // The selector is a one bit mask that is used to extract the
+                // value of the sprite at this coordinate
+                let selector = 0b1000_0000u8 >> j;
+
+                let sprite_pixel_value = (line & selector) >> (7 - j);
+                let display_pixel_value = self.pixels[pixel_index]; // Maybe make reference
+
+                if sprite_pixel_value == 0x0 && display_pixel_value == COLOR_EMPTY {
+                    self.pixels[pixel_index] = COLOR_EMPTY;
+                } else if sprite_pixel_value == 0x0 && display_pixel_value == COLOR_FILLED {
+                    self.pixels[pixel_index] = COLOR_FILLED;
+                } else if sprite_pixel_value == 0x1 && display_pixel_value == COLOR_EMPTY {
+                    self.pixels[pixel_index] = COLOR_FILLED;
+                } else if sprite_pixel_value == 0x1 && display_pixel_value == COLOR_FILLED {
+                    // I'm pretty sure that the only way this operation would
+                    // erase an existing pixel is if both the sprite value is
+                    // filled and the existing display value is also filled,
+                    // therefor, I've added a check for this case.
+                    pixels_erased = true;
+                    self.pixels[pixel_index] = COLOR_EMPTY;
+                } else {
+                    panic!("No matching condition for drawing pixel. This shouldn't be possible");
+                }
+            }
+        }
+
+        pixels_erased
     }
 }
 
@@ -171,7 +230,11 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0xA {
             // Annn
             self.ld_i_addr(current_instruction);
+        } else if current_instruction >> 12 == 0xD {
+            // Dxyn
+            self.drw_vx_vy_nibble(current_instruction);
         } else {
+            thread::sleep(Duration::from_millis(10000));
             panic!("Invalid Instruction: {:#02x}", current_instruction)
         }
 
@@ -404,25 +467,22 @@ impl Chip8 {
     /// section 2.4, Display, for more information on the Chip-8 screen and
     /// sprites.
     fn drw_vx_vy_nibble(&mut self, command: u16) {
-        panic!("Not Implemented");
-    }
+        let x = (command & 0x0F00) >> 8;
+        let y = (command & 0x00F0) >> 4;
+        let n = command & 0x000F;
 
-    /// Ex9E - SKP Vx
-    /// Skip next instruction if key with the value of Vx is pressed.
-    ///
-    /// Checks the keyboard, and if the key corresponding to the value of Vx is
-    /// currently in the down position, PC is increased by 2.
-    fn skp_vx(&mut self, command: u16) {
-        panic!("Not Implemented");
-    }
+        let sprite_data = self.ram.read_bytes(self.i as usize, n as usize);
+        println!("Sprite Data: {:?}", sprite_data);
 
-    /// ExA1 - SKNP Vx
-    /// Skip next instruction if key with the value of Vx is not pressed.
-    ///
-    /// Checks the keyboard, and if the key corresponding to the value of Vx is
-    /// currently in the up position, PC is increased by 2.
-    fn sknp_vx(&mut self, command: u16) {
-        panic!("Not Implemented");
+        let pixels_erased = self
+            .display
+            .draw_sprite(x as usize, y as usize, sprite_data);
+
+        if pixels_erased {
+            self.vx[0xF] = 0x1;
+        } else {
+            self.vx[0xF] = 0x0;
+        }
     }
 
     // /// Ex9E - SKP Vx
