@@ -238,6 +238,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0xD {
             // Dxyn
             self.drw_vx_vy_nibble(current_instruction);
+        } else if current_instruction & 0xF0FF == 0xF033 {
+            // Fx33
+            self.ld_b_vx(current_instruction);
         } else {
             thread::sleep(Duration::from_millis(10000));
             panic!("Invalid Instruction: {:#02x}", current_instruction)
@@ -566,15 +569,24 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// Fx33 - LD B, Vx
-    // /// Store BCD representation of Vx in memory locations I, I+1, and I+2.
-    // ///
-    // /// The interpreter takes the decimal value of Vx, and places the hundreds
-    // /// digit in memory at location in I, the tens digit at location I+1, and
-    // /// the ones digit at location I+2.
-    // fn ld_b_vx(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// Fx33 - LD B, Vx
+    /// Store BCD representation of Vx in memory locations I, I+1, and I+2.
+    ///
+    /// The interpreter takes the decimal value of Vx, and places the hundreds
+    /// digit in memory at location in I, the tens digit at location I+1, and
+    /// the ones digit at location I+2.
+    fn ld_b_vx(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        let reg_val = self.vx[x] as u8;
+
+        let hundreds: u8 = reg_val / 100;
+        let tens: u8 = (reg_val - hundreds * 100) / 10;
+        let ones: u8 = reg_val - (hundreds * 100 + tens * 10);
+
+        self.ram
+            .write_data(self.i as usize, &[hundreds, tens, ones]);
+    }
 
     // /// Fx55 - LD [I], Vx
     // /// Store registers V0 through Vx in memory starting at location I.
