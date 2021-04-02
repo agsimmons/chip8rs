@@ -187,6 +187,7 @@ pub struct Chip8 {
     i: u16,
     pc: u16,
     sp: u8,
+    stack: [u16; 16],
     ram: Ram,
     display: Display,
 }
@@ -198,6 +199,7 @@ impl Chip8 {
             i: 0x0,
             pc: 0x200,
             sp: 0x0,
+            stack: [0x0; 16],
             ram: Ram::new(&config.rom_path),
             display: Display::new(),
         }
@@ -224,6 +226,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0x1 {
             // 1nnn
             self.jp_addr(current_instruction);
+        } else if current_instruction >> 12 == 0x2 {
+            // 2nnn
+            self.call_addr(current_instruction);
         } else if current_instruction >> 12 == 0x6 {
             // 6xkk
             self.ld_vx_byte(current_instruction);
@@ -274,14 +279,21 @@ impl Chip8 {
         self.pc = command & 0x0FFF;
     }
 
-    // /// 2nnn - CALL addr
-    // /// Call subroutine at nnn.
-    // ///
-    // /// The interpreter increments the stack pointer, then puts the current PC
-    // /// on the top of the stack. The PC is then set to nnn.
-    // fn call_addr(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// 2nnn - CALL addr
+    /// Call subroutine at nnn.
+    ///
+    /// The interpreter increments the stack pointer, then puts the current PC
+    /// on the top of the stack. The PC is then set to nnn.
+    fn call_addr(&mut self, command: u16) {
+        // Increment stack pointer
+        self.sp += 1;
+
+        // Put the current PC on the top of the stack
+        self.stack[self.sp as usize] = self.pc;
+
+        // Set PC to specified value
+        self.pc = command & 0x0FFF;
+    }
 
     // /// 3xkk - SE Vx, byte
     // /// Skip next instruction if Vx = kk.
