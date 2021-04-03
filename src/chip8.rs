@@ -243,6 +243,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0xD {
             // Dxyn
             self.drw_vx_vy_nibble(current_instruction);
+        } else if current_instruction & 0xF0FF == 0xF007 {
+            // Fx07
+            self.ld_vx_dt(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF015 {
             // Fx15
             self.ld_dt_vx(current_instruction);
@@ -536,13 +539,15 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// Fx07 - LD Vx, DT
-    // /// Set Vx = delay timer value.
-    // ///
-    // /// The value of DT is placed into Vx.
-    // fn ld_vx_dt(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// Fx07 - LD Vx, DT
+    /// Set Vx = delay timer value.
+    ///
+    /// The value of DT is placed into Vx.
+    fn ld_vx_dt(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        self.vx[x] = self.dt;
+    }
 
     // /// Fx0A - LD Vx, K
     // /// Wait for a key press, store the value of the key in Vx.
