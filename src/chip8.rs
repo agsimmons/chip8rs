@@ -238,6 +238,8 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0xD {
             // Dxyn
             self.drw_vx_vy_nibble(current_instruction);
+        } else if current_instruction & 0xF0FF == 0xF029 {
+            self.ld_f_vx(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF033 {
             // Fx33
             self.ld_b_vx(current_instruction);
@@ -562,15 +564,22 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// Fx29 - LD F, Vx
-    // /// Set I = location of sprite for digit Vx.
-    // ///
-    // /// The value of I is set to the location for the hexadecimal sprite
-    // /// corresponding to the value of Vx. See section 2.4, Display, for
-    // /// more information on the Chip-8 hexadecimal font.
-    // fn ld_f_vx(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// Fx29 - LD F, Vx
+    /// Set I = location of sprite for digit Vx.
+    ///
+    /// The value of I is set to the location for the hexadecimal sprite
+    /// corresponding to the value of Vx. See section 2.4, Display, for
+    /// more information on the Chip-8 hexadecimal font.
+    fn ld_f_vx(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        let digit = self.vx[x];
+
+        // Each sprite is 5 bytes long, so multiply the digit by 5 to get the
+        // memory address. For example, the sprite for 0 begins at 0x0, and the
+        // sprite for 1 begins at 0x5
+        self.i = digit * 5;
+    }
 
     /// Fx33 - LD B, Vx
     /// Store BCD representation of Vx in memory locations I, I+1, and I+2.
