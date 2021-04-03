@@ -187,6 +187,7 @@ pub struct Chip8 {
     i: u16,
     pc: u16,
     sp: u8,
+    dt: u16,
     stack: [u16; 16],
     ram: Ram,
     display: Display,
@@ -199,6 +200,7 @@ impl Chip8 {
             i: 0x0,
             pc: 0x200,
             sp: 0x0,
+            dt: 0x0,
             stack: [0x0; 16],
             ram: Ram::new(&config.rom_path),
             display: Display::new(),
@@ -241,6 +243,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0xD {
             // Dxyn
             self.drw_vx_vy_nibble(current_instruction);
+        } else if current_instruction & 0xF0FF == 0xF015 {
+            // Fx15
+            self.ld_dt_vx(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF029 {
             // Fx29
             self.ld_f_vx(current_instruction);
@@ -548,13 +553,15 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// Fx15 - LD DT, Vx
-    // /// Set delay timer = Vx.
-    // ///
-    // /// DT is set equal to the value of Vx.
-    // fn ld_dt_vx(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// Fx15 - LD DT, Vx
+    /// Set delay timer = Vx.
+    ///
+    /// DT is set equal to the value of Vx.
+    fn ld_dt_vx(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        self.dt = self.vx[x];
+    }
 
     // /// Fx18 - LD ST, Vx
     // /// Set sound timer = Vx.
