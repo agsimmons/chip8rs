@@ -239,6 +239,7 @@ impl Chip8 {
             // Dxyn
             self.drw_vx_vy_nibble(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF029 {
+            // Fx29
             self.ld_f_vx(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF033 {
             // Fx33
