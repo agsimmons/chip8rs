@@ -166,9 +166,9 @@ impl Ram {
         }
     }
 
-    // fn read_byte(&self, index: usize) -> &u8 {
-    //     &self.memory[index]
-    // }
+    fn read_byte(&self, index: usize) -> &u8 {
+        &self.memory[index]
+    }
 
     fn read_word(&self, index: usize) -> u16 {
         let bytes = self.read_bytes(index, 2);
@@ -241,6 +241,9 @@ impl Chip8 {
         } else if current_instruction & 0xF0FF == 0xF033 {
             // Fx33
             self.ld_b_vx(current_instruction);
+        } else if current_instruction & 0xF0FF == 0xF065 {
+            // Fx65
+            self.ld_vx_i(current_instruction);
         } else {
             thread::sleep(Duration::from_millis(10000));
             panic!("Invalid Instruction: {:#02x}", current_instruction)
@@ -597,14 +600,22 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// Fx65 - LD Vx, [I]
-    // /// Read registers V0 through Vx from memory starting at location I.
-    // ///
-    // /// The interpreter reads values from memory starting at location I into
-    // /// registers V0 through Vx.
-    // fn load_vx_i(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// Fx65 - LD Vx, [I]
+    /// Read registers V0 through Vx from memory starting at location I.
+    ///
+    /// The interpreter reads values from memory starting at location I into
+    /// registers V0 through Vx.
+    fn ld_vx_i(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        for i in 0..x + 1 {
+            let memory_index = self.i as usize + i;
+            // println!("memory_index: {:?}", memory_index);
+            // println!("vx[{:#04x?}] before is {:#06x?}", i, self.vx[i]);
+            self.vx[i] = *self.ram.read_byte(memory_index) as u16;
+            // println!("vx[{:#04x?}] after is {:#06x?}", i, self.vx[i]);
+        }
+    }
 
     pub fn debug_print_ram(&self) {
         // NOTE: This is set to only show the beginning of ram for testing
