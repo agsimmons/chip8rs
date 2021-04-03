@@ -280,7 +280,8 @@ impl Chip8 {
     /// The interpreter sets the program counter to the address at the top of
     /// the stack, then subtracts 1 from the stack pointer.
     fn ret(&mut self) {
-        panic!("Not Implemented");
+        self.pc = self.stack[self.sp as usize];
+        self.sp -= 1;
     }
 
     /// 1nnn - JP addr
