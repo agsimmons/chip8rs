@@ -232,6 +232,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0x6 {
             // 6xkk
             self.ld_vx_byte(current_instruction);
+        } else if current_instruction >> 12 == 0x7 {
+            // 7xkk
+            self.add_vx_byte(current_instruction);
         } else if current_instruction >> 12 == 0xA {
             // Annn
             self.ld_i_addr(current_instruction);
@@ -342,14 +345,17 @@ impl Chip8 {
         self.vx[register as usize] = value;
     }
 
-    // /// 7xkk - ADD Vx, byte
-    // /// Set Vx = Vx + kk.
-    // ///
-    // /// Adds the value kk to the value of register Vx, then stores the result
-    // /// in Vx.
-    // fn add_vx_byte(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// 7xkk - ADD Vx, byte
+    /// Set Vx = Vx + kk.
+    ///
+    /// Adds the value kk to the value of register Vx, then stores the result
+    /// in Vx.
+    fn add_vx_byte(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+        let kk = command & 0x00FF;
+
+        self.vx[x] += kk;
+    }
 
     // /// 8xy0 - LD Vx, Vy
     // /// Set Vx = Vy.
