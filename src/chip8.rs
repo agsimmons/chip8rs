@@ -252,6 +252,9 @@ impl Chip8 {
         } else if current_instruction & 0xF0FF == 0xF015 {
             // Fx15
             self.ld_dt_vx(current_instruction);
+        } else if current_instruction & 0xF0FF == 0xF01E {
+            // Fx1E
+            self.add_i_vx(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF029 {
             // Fx29
             self.ld_f_vx(current_instruction);
@@ -584,13 +587,15 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// Fx1E - ADD I, Vx
-    // /// Set I = I + Vx.
-    // ///
-    // /// The values of I and Vx are added, and the results are stored in I.
-    // fn add_ii_vx(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// Fx1E - ADD I, Vx
+    /// Set I = I + Vx.
+    ///
+    /// The values of I and Vx are added, and the results are stored in I.
+    fn add_i_vx(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        self.i += self.vx[x]
+    }
 
     /// Fx29 - LD F, Vx
     /// Set I = location of sprite for digit Vx.
