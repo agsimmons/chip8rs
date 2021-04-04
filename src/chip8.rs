@@ -268,6 +268,8 @@ impl Chip8 {
             panic!("Invalid Instruction: {:#02x}", current_instruction)
         }
 
+        // TODO: Should any of the timers be decremented here?
+
         self.display.update();
     }
 
