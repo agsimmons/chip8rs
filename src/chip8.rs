@@ -218,7 +218,7 @@ impl Chip8 {
 
     pub fn run_instruction(&mut self) {
         let current_instruction = self.ram.read_word(self.pc as usize);
-        println!("Current Instruction: {:#02x}", current_instruction);
+        println!("Current Instruction: {:#04X}", current_instruction);
 
         if current_instruction == 0x00E0 {
             self.cls();
@@ -682,13 +682,13 @@ impl Chip8 {
 
     pub fn debug_print_ram(&self) {
         // NOTE: This is set to only show the beginning of ram for testing
-        println!("{:?}", &self.ram.memory[0..1024]);
+        println!("{:02X?}", &self.ram.memory[0..1024]);
     }
 
     pub fn debug_print_registers(&self) {
-        println!("vX: {:?}", self.vx);
-        println!("I: {:#06x?}", self.i);
-        println!("PC: {:#06x?}", self.pc);
-        println!("SP: {:#04x?}", self.sp);
+        println!("vX: {:02X?}", self.vx);
+        println!("I: {:#06X?}", self.i);
+        println!("PC: {:#06X?}", self.pc);
+        println!("SP: {:#04X?}", self.sp);
     }
 }
