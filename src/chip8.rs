@@ -80,7 +80,7 @@ impl Display {
         let mut pixels_erased = false;
         for (i, line) in sprite_data.iter().enumerate() {
             let local_y = y + i;
-            for j in 0..4 {
+            for j in 0..8 {
                 let local_x = x + j;
                 let (wrapped_x, wrapped_y) = Display::get_wrapped_coordinates(local_x, local_y);
                 let pixel_index = Display::coordinate_to_index(wrapped_x, wrapped_y);
