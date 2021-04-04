@@ -245,6 +245,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0x7 {
             // 7xkk
             self.add_vx_byte(current_instruction);
+        } else if current_instruction >> 12 == 0x9 {
+            // 9xy0
+            self.sne_vx_vy(current_instruction);
         } else if current_instruction >> 12 == 0xA {
             // Annn
             self.ld_i_addr(current_instruction);
@@ -492,14 +495,21 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// 9xy0 - SNE Vx, Vy
-    // /// Skip next instruction if Vx != Vy.
-    // ///
-    // /// The values of Vx and Vy are compared, and if they are not equal, the
-    // /// program counter is increased by 2.
-    // fn sne_vx_vy(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// 9xy0 - SNE Vx, Vy
+    /// Skip next instruction if Vx != Vy.
+    ///
+    /// The values of Vx and Vy are compared, and if they are not equal, the
+    /// program counter is increased by 2.
+    fn sne_vx_vy(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+        let y = ((command & 0x00F0) >> 4) as usize;
+
+        if self.vx[x] != self.vx[y] {
+            self.pc += 2;
+        }
+
+        self.pc += 2;
+    }
 
     /// Annn - LD I, addr
     /// Set I = nnn.
