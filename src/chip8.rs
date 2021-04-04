@@ -302,7 +302,10 @@ impl Chip8 {
             panic!("Invalid Instruction: {:#02x}", current_instruction)
         }
 
-        // TODO: Should any of the timers be decremented here?
+        // Decrement Timers
+        if self.dt > 0 {
+            self.dt -= 1;
+        }
 
         self.display.update();
     }
@@ -760,6 +763,7 @@ impl Chip8 {
         println!("vX: {:02X?}", self.vx);
         println!("I: {:#06X?}", self.i);
         println!("PC: {:#06X?}", self.pc);
+        println!("DT: {:#04X?}", self.dt);
         println!("SP: {:#04X?}", self.sp);
     }
 
