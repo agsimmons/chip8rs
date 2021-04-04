@@ -75,6 +75,7 @@ impl Display {
     /// to be erased
     fn draw_sprite(&mut self, x: usize, y: usize, sprite_data: &[u8]) -> bool {
         println!("Drawsprite at ({}, {})", x, y);
+        println!("Sprite Data: {:?}", sprite_data);
 
         let mut pixels_erased = false;
         for (i, line) in sprite_data.iter().enumerate() {
