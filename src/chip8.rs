@@ -220,8 +220,6 @@ impl Chip8 {
         let current_instruction = self.ram.read_word(self.pc as usize);
         println!("Current Instruction: {:#02x}", current_instruction);
 
-        self.pc += 2;
-
         if current_instruction == 0x00E0 {
             self.cls();
         } else if current_instruction == 0x00EE {
@@ -266,7 +264,6 @@ impl Chip8 {
             // Fx65
             self.ld_vx_i(current_instruction);
         } else {
-            thread::sleep(Duration::from_millis(10000));
             panic!("Invalid Instruction: {:#02x}", current_instruction)
         }
 
@@ -287,6 +284,8 @@ impl Chip8 {
     fn cls(&mut self) {
         println!("clear_display called");
         self.display.clear();
+
+        self.pc += 2;
     }
 
     /// 00EE - RET
@@ -335,6 +334,8 @@ impl Chip8 {
         if self.vx[x] == kk {
             self.pc += 2;
         }
+
+        self.pc += 2;
     }
 
     // /// 4xkk - SNE Vx, byte
@@ -364,6 +365,8 @@ impl Chip8 {
         let value = command & 0x00FF;
 
         self.vx[register as usize] = value;
+
+        self.pc += 2;
     }
 
     /// 7xkk - ADD Vx, byte
@@ -376,6 +379,8 @@ impl Chip8 {
         let kk = command & 0x00FF;
 
         self.vx[x] += kk;
+
+        self.pc += 2;
     }
 
     // /// 8xy0 - LD Vx, Vy
@@ -481,6 +486,8 @@ impl Chip8 {
         let value = command & 0x0FFF;
 
         self.i = value;
+
+        self.pc += 2;
     }
 
     // /// Bnnn - JP V0, addr
@@ -531,6 +538,8 @@ impl Chip8 {
         } else {
             self.vx[0xF] = 0x0;
         }
+
+        self.pc += 2;
     }
 
     // /// Ex9E - SKP Vx
@@ -559,6 +568,8 @@ impl Chip8 {
         let x = ((command & 0x0F00) >> 8) as usize;
 
         self.vx[x] = self.dt;
+
+        self.pc += 2;
     }
 
     // /// Fx0A - LD Vx, K
@@ -578,6 +589,8 @@ impl Chip8 {
         let x = ((command & 0x0F00) >> 8) as usize;
 
         self.dt = self.vx[x];
+
+        self.pc += 2;
     }
 
     // /// Fx18 - LD ST, Vx
@@ -596,6 +609,8 @@ impl Chip8 {
         let x = ((command & 0x0F00) >> 8) as usize;
 
         self.i += self.vx[x];
+
+        self.pc += 2;
     }
 
     /// Fx29 - LD F, Vx
@@ -613,6 +628,8 @@ impl Chip8 {
         // memory address. For example, the sprite for 0 begins at 0x0, and the
         // sprite for 1 begins at 0x5
         self.i = digit * 5;
+
+        self.pc += 2;
     }
 
     /// Fx33 - LD B, Vx
@@ -632,6 +649,8 @@ impl Chip8 {
 
         self.ram
             .write_data(self.i as usize, &[hundreds, tens, ones]);
+
+        self.pc += 2;
     }
 
     // /// Fx55 - LD [I], Vx
@@ -658,6 +677,8 @@ impl Chip8 {
             self.vx[i] = *self.ram.read_byte(memory_index) as u16;
             // println!("vx[{:#04x?}] after is {:#06x?}", i, self.vx[i]);
         }
+
+        self.pc += 2;
     }
 
     pub fn debug_print_ram(&self) {
