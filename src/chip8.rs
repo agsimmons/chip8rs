@@ -233,6 +233,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0x3 {
             // 3xkk
             self.se_vx_byte(current_instruction);
+        } else if current_instruction >> 12 == 0x4 {
+            // 4xkk
+            self.sne_vx_byte(current_instruction);
         } else if current_instruction >> 12 == 0x6 {
             // 6xkk
             self.ld_vx_byte(current_instruction);
@@ -341,14 +344,21 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    // /// 4xkk - SNE Vx, byte
-    // /// Skip next instruction if Vx != kk.
-    // ///
-    // /// The interpreter compares register Vx to kk, and if they are not equal,
-    // /// increments the program counter by 2.
-    // fn sne_vx_byte(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// 4xkk - SNE Vx, byte
+    /// Skip next instruction if Vx != kk.
+    ///
+    /// The interpreter compares register Vx to kk, and if they are not equal,
+    /// increments the program counter by 2.
+    fn sne_vx_byte(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+        let kk = command & 0x00FF;
+
+        if self.vx[x] != kk {
+            self.pc += 2;
+        }
+
+        self.pc += 2;
+    }
 
     // /// 5xy0 - SE Vx, Vy
     // /// Skip next instruction if Vx = Vy.
