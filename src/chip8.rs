@@ -192,6 +192,7 @@ pub struct Chip8 {
     stack: [u16; 16],
     ram: Ram,
     display: Display,
+    keymap: Vec<Key>,
 }
 
 impl Chip8 {
@@ -205,6 +206,24 @@ impl Chip8 {
             stack: [0x0; 16],
             ram: Ram::new(&config.rom_path),
             display: Display::new(),
+            keymap: vec![
+                Key::X,
+                Key::Key1,
+                Key::Key2,
+                Key::Key3,
+                Key::Q,
+                Key::W,
+                Key::E,
+                Key::A,
+                Key::S,
+                Key::D,
+                Key::Z,
+                Key::C,
+                Key::Key4,
+                Key::R,
+                Key::F,
+                Key::V,
+            ],
         }
     }
 
@@ -731,5 +750,15 @@ impl Chip8 {
         println!("I: {:#06X?}", self.i);
         println!("PC: {:#06X?}", self.pc);
         println!("SP: {:#04X?}", self.sp);
+    }
+
+    pub fn debug_print_keymap(&self) {
+        let mut key_states: Vec<bool> = Vec::new();
+
+        for key in self.keymap.iter() {
+            key_states.push(self.display.window.is_key_down(*key));
+        }
+
+        println!("Keymap: {:?}", key_states);
     }
 }
