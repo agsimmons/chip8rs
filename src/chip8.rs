@@ -594,7 +594,7 @@ impl Chip8 {
     fn add_i_vx(&mut self, command: u16) {
         let x = ((command & 0x0F00) >> 8) as usize;
 
-        self.i += self.vx[x]
+        self.i += self.vx[x];
     }
 
     /// Fx29 - LD F, Vx
