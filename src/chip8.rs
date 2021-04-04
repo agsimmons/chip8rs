@@ -75,7 +75,7 @@ impl Display {
     /// to be erased
     fn draw_sprite(&mut self, x: usize, y: usize, sprite_data: &[u8]) -> bool {
         println!("Drawsprite at ({}, {})", x, y);
-        println!("Sprite Data: {:?}", sprite_data);
+        println!("Sprite Data: {:02X?}", sprite_data);
 
         let mut pixels_erased = false;
         for (i, line) in sprite_data.iter().enumerate() {
@@ -264,6 +264,7 @@ impl Chip8 {
             // Fx65
             self.ld_vx_i(current_instruction);
         } else {
+            thread::sleep(Duration::from_millis(1000));
             panic!("Invalid Instruction: {:#02x}", current_instruction)
         }
 
