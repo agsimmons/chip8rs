@@ -10,7 +10,7 @@ use std::time::Duration;
 
 const DISPLAY_WIDTH: usize = 64;
 const DISPLAY_HEIGHT: usize = 32;
-const FRAME_TIME: Duration = Duration::from_micros(166000); // TODO: Change from 1/6s to 1/60s
+const FRAME_TIME: Duration = Duration::from_micros(16600);
 const COLOR_EMPTY: u32 = 0x000000;
 const COLOR_FILLED: u32 = 0xFFFFFF;
 
