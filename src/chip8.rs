@@ -218,7 +218,7 @@ impl Chip8 {
 
     pub fn run_instruction(&mut self) {
         let current_instruction = self.ram.read_word(self.pc as usize);
-        println!("Current Instruction: {:#04X}", current_instruction);
+        println!("Current Instruction: {:#06X}", current_instruction);
 
         if current_instruction == 0x00E0 {
             self.cls();
@@ -245,6 +245,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0x7 {
             // 7xkk
             self.add_vx_byte(current_instruction);
+        } else if current_instruction & 0xF00F == 0x8000 {
+            // 8xy0
+            self.ld_vx_vy(current_instruction);
         } else if current_instruction >> 12 == 0x9 {
             // 9xy0
             self.sne_vx_vy(current_instruction);
@@ -409,13 +412,18 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    // /// 8xy0 - LD Vx, Vy
-    // /// Set Vx = Vy.
-    // ///
-    // /// Stores the value of register Vy in register Vx.
-    // fn ld_vx_vy(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// 8xy0 - LD Vx, Vy
+    /// Set Vx = Vy.
+    ///
+    /// Stores the value of register Vy in register Vx.
+    fn ld_vx_vy(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+        let y = ((command & 0x00F0) >> 4) as usize;
+
+        self.vx[x] = self.vx[y];
+
+        self.pc += 2;
+    }
 
     // /// 8xy1 - OR Vx, Vy
     // /// Set Vx = Vx OR Vy.
