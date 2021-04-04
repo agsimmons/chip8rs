@@ -276,6 +276,9 @@ impl Chip8 {
         } else if current_instruction >> 12 == 0xD {
             // Dxyn
             self.drw_vx_vy_nibble(current_instruction);
+        } else if current_instruction >> 12 == 0xE {
+            // ExA1
+            self.sknp_vx(current_instruction);
         } else if current_instruction & 0xF0FF == 0xF007 {
             // Fx07
             self.ld_vx_dt(current_instruction);
@@ -610,14 +613,22 @@ impl Chip8 {
     //     panic!("Not Implemented");
     // }
 
-    // /// ExA1 - SKNP Vx
-    // /// Skip next instruction if key with the value of Vx is not pressed.
-    // ///
-    // /// Checks the keyboard, and if the key corresponding to the value of Vx is
-    // /// currently in the up position, PC is increased by 2.
-    // fn sknp_vx(&mut self, command: u16) {
-    //     panic!("Not Implemented");
-    // }
+    /// ExA1 - SKNP Vx
+    /// Skip next instruction if key with the value of Vx is not pressed.
+    ///
+    /// Checks the keyboard, and if the key corresponding to the value of Vx is
+    /// currently in the up position, PC is increased by 2.
+    fn sknp_vx(&mut self, command: u16) {
+        let x = ((command & 0x0F00) >> 8) as usize;
+
+        let key_index = self.vx[x] as usize;
+
+        if self.display.window.is_key_down(self.keymap[key_index]) == false {
+            self.pc += 2
+        }
+
+        self.pc += 2
+    }
 
     /// Fx07 - LD Vx, DT
     /// Set Vx = delay timer value.
