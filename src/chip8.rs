@@ -184,11 +184,11 @@ impl Ram {
 }
 
 pub struct Chip8 {
-    vx: [u16; 16],
+    vx: [u8; 16],
     i: u16,
     pc: u16,
     sp: u8,
-    dt: u16,
+    dt: u8,
     stack: [u16; 16],
     ram: Ram,
     display: Display,
@@ -335,7 +335,7 @@ impl Chip8 {
     /// increments the program counter by 2.
     fn se_vx_byte(&mut self, command: u16) {
         let x = ((command & 0x0F00) >> 8) as usize;
-        let kk = command & 0x00FF;
+        let kk = (command & 0x00FF) as u8;
 
         if self.vx[x] == kk {
             self.pc += 2;
@@ -351,7 +351,7 @@ impl Chip8 {
     /// increments the program counter by 2.
     fn sne_vx_byte(&mut self, command: u16) {
         let x = ((command & 0x0F00) >> 8) as usize;
-        let kk = command & 0x00FF;
+        let kk = (command & 0x00FF) as u8;
 
         if self.vx[x] != kk {
             self.pc += 2;
@@ -375,7 +375,7 @@ impl Chip8 {
     /// The interpreter puts the value kk into register Vx.
     fn ld_vx_byte(&mut self, command: u16) {
         let register = (command & 0x0F00) >> 8;
-        let value = command & 0x00FF;
+        let value = (command & 0x00FF) as u8;
 
         self.vx[register as usize] = value;
 
@@ -389,9 +389,9 @@ impl Chip8 {
     /// in Vx.
     fn add_vx_byte(&mut self, command: u16) {
         let x = ((command & 0x0F00) >> 8) as usize;
-        let kk = command & 0x00FF;
+        let kk = (command & 0x00FF) as u8;
 
-        self.vx[x] += kk;
+        self.vx[x] = self.vx[x].wrapping_add(kk);
 
         self.pc += 2;
     }
@@ -620,7 +620,7 @@ impl Chip8 {
     fn add_i_vx(&mut self, command: u16) {
         let x = ((command & 0x0F00) >> 8) as usize;
 
-        self.i += self.vx[x];
+        self.i += self.vx[x] as u16;
 
         self.pc += 2;
     }
@@ -634,7 +634,7 @@ impl Chip8 {
     fn ld_f_vx(&mut self, command: u16) {
         let x = ((command & 0x0F00) >> 8) as usize;
 
-        let digit = self.vx[x];
+        let digit = self.vx[x] as u16;
 
         // Each sprite is 5 bytes long, so multiply the digit by 5 to get the
         // memory address. For example, the sprite for 0 begins at 0x0, and the
@@ -686,7 +686,7 @@ impl Chip8 {
             let memory_index = self.i as usize + i;
             // println!("memory_index: {:?}", memory_index);
             // println!("vx[{:#04x?}] before is {:#06x?}", i, self.vx[i]);
-            self.vx[i] = *self.ram.read_byte(memory_index) as u16;
+            self.vx[i] = *self.ram.read_byte(memory_index);
             // println!("vx[{:#04x?}] after is {:#06x?}", i, self.vx[i]);
         }
 
