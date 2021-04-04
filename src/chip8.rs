@@ -522,16 +522,15 @@ impl Chip8 {
     /// section 2.4, Display, for more information on the Chip-8 screen and
     /// sprites.
     fn drw_vx_vy_nibble(&mut self, command: u16) {
-        let x = (command & 0x0F00) >> 8;
-        let y = (command & 0x00F0) >> 4;
-        let n = command & 0x000F;
+        let x = ((command & 0x0F00) >> 8) as usize;
+        let y = ((command & 0x00F0) >> 4) as usize;
+        let n = (command & 0x000F) as usize;
 
-        let sprite_data = self.ram.read_bytes(self.i as usize, n as usize);
-        println!("Sprite Data: {:?}", sprite_data);
+        let sprite_data = self.ram.read_bytes(self.i as usize, n);
 
-        let pixels_erased = self
-            .display
-            .draw_sprite(x as usize, y as usize, sprite_data);
+        let pixels_erased =
+            self.display
+                .draw_sprite(self.vx[x] as usize, self.vx[y] as usize, sprite_data);
 
         if pixels_erased {
             self.vx[0xF] = 0x1;
