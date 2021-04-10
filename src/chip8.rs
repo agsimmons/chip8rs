@@ -334,8 +334,8 @@ impl Chip8 {
     /// The interpreter sets the program counter to the address at the top of
     /// the stack, then subtracts 1 from the stack pointer.
     fn ret(&mut self) {
-        self.pc = self.stack[self.sp as usize];
         self.sp -= 1;
+        self.pc = self.stack[self.sp as usize];
     }
 
     /// 1nnn - JP addr
@@ -352,11 +352,11 @@ impl Chip8 {
     /// The interpreter increments the stack pointer, then puts the current PC
     /// on the top of the stack. The PC is then set to nnn.
     fn call_addr(&mut self, command: u16) {
-        // Increment stack pointer
-        self.sp += 1;
-
         // Put the current PC on the top of the stack
         self.stack[self.sp as usize] = self.pc;
+
+        // Increment stack pointer
+        self.sp += 1;
 
         // Set PC to specified value
         self.pc = command & 0x0FFF;
