@@ -761,6 +761,7 @@ impl Chip8 {
 
     pub fn debug_print_registers(&self) {
         println!("vX: {:02X?}", self.vx);
+        println!("stack: {:04X?}", self.stack);
         println!("I: {:#06X?}", self.i);
         println!("PC: {:#06X?}", self.pc);
         println!("DT: {:#04X?}", self.dt);
